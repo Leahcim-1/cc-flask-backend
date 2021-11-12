@@ -1,12 +1,14 @@
 import json
 from flask_dance.contrib.google import make_google_blueprint, google
 
+"""
+read client secret from the local client secret json file 
+"""
 with open('client_secret.json','r') as myfile:
     data = myfile.read()
 
 obj = json.loads(data)
 
-print(obj['web'])
 
 def security():
     blueprint = make_google_blueprint(
