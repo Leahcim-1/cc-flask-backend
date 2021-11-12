@@ -1,9 +1,17 @@
-from flask import Flask, request, Response
+from flask import Flask, request, Response, redirect, url_for
 import requests
+from middlewares.security import security
+from flask_dance.contrib.google import google
+
+blueprint = security()
 
 app = Flask(__name__)
 
-USER_SERVICE_HOST = 'http://127.0.0.1:5000/'
+app.secret_key = "cloud"
+
+app.register_blueprint(blueprint, url_prefix="/login")
+
+USER_SERVICE_HOST = 'http://6259-160-39-145-247.ngrok.io/'
 
 
 def proxy(new_host):
@@ -22,9 +30,18 @@ def proxy(new_host):
     response = Response(resp.content, resp.status_code, headers)
     return response
 
+@app.route("/api/users")
+def users():
+    if not google.authorized:
+        return redirect(url_for("google.login"))
+    resp = google.get("/oauth2/v1/userinfo")
+    assert resp.ok, resp.text
+    print(resp.json())
+    return "You are on Google"
+
 @app.route("/")
-def hello_world():
-    return "<p>Hello, World!</p>"
+def index():
+    return "You are on Google"
 
 @app.route("/api/users")
 def users_proxy():
